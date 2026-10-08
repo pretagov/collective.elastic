@@ -2,6 +2,8 @@
 
 ## 6.0.0 (unreleased)
 
+- Add settings to retry searches after a delay when the cluster can't be reached @instification
+
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
 - Run next to collective.elasticsearch @instification
