@@ -3,6 +3,7 @@ from .fetch import fetch_data
 from collective.elastic import local
 from collective.elastic.compat import es_bulk
 from collective.elastic.compat import es_update
+from collective.elastic.compat import get_serializer_params
 from collective.elastic.manager import ElasticSearchManager
 from elasticsearch import Elasticsearch
 from rq import Queue
@@ -32,7 +33,8 @@ def es_connection(hosts, **params):
     connection = local.get_local(ElasticSearchManager.connection_key)
     if not connection:
         local.set_local(
-            ElasticSearchManager.connection_key, Elasticsearch(hosts, **params)
+            ElasticSearchManager.connection_key,
+            Elasticsearch(hosts, **get_serializer_params(), **params),
         )
         connection = local.get_local(ElasticSearchManager.connection_key)
     return connection

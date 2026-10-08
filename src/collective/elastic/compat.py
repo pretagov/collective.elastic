@@ -4,6 +4,8 @@ Compatibility layer for Elasticsearch 7.x and 8.x Python client.
 This module provides helper functions to handle API differences between
 elasticsearch-py versions 7.x and 8.x.
 """
+from collective.elastic.serializer import SetJSONSerializer
+from collective.elastic.serializer import SetNdjsonSerializer
 from elasticsearch import VERSION as ES_VERSION
 
 
@@ -73,6 +75,27 @@ def get_connection_params(settings):
         "sniffer_timeout": settings.sniffer_timeout,
         "timeout": settings.timeout,
     }
+
+
+def get_serializer_params():
+    """
+    Build the client arguments that install the set aware serializers.
+
+    ES 8 picks a serializer per mimetype and serializes bulk bodies as ndjson,
+    so both mimetypes are overridden. ES 7 serializes every request body with
+    its single ``serializer``.
+
+    Returns:
+        Dictionary of keyword arguments for Elasticsearch() init.
+    """
+    if IS_ES_8:
+        return {
+            "serializers": {
+                SetJSONSerializer.mimetype: SetJSONSerializer(),
+                SetNdjsonSerializer.mimetype: SetNdjsonSerializer(),
+            }
+        }
+    return {"serializer": SetJSONSerializer()}
 
 
 def es_search(conn, index, body, **kwargs):
