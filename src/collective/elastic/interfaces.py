@@ -82,6 +82,24 @@ class IElasticSettings(Interface):
         title="Retry on timeout", default=True, required=False
     )
 
+    retry_attempts = schema.Int(
+        title="Search retry attempts",
+        description="How often to retry a search that failed because the "
+        "cluster could not be reached or didn't answer in time, e.g. while "
+        "the network recovers after the host resumed. 0 disables retrying.",
+        default=0,
+        min=0,
+        required=False,
+    )
+
+    retry_delay = schema.Float(
+        title="Search retry delay",
+        description="Seconds to wait before retrying a search.",
+        default=5.0,
+        min=0.0,
+        required=False,
+    )
+
     timeout = schema.Float(
         title="Read timeout",
         description="how long before timeout connecting to elastic search",
