@@ -52,6 +52,26 @@ class TestFetchSessionInitialization(unittest.TestCase):
         self.assertIs(session1, session2)
 
 
+class TestFetchData(unittest.TestCase):
+    def setUp(self):
+        local.localData.__dict__.clear()
+
+    def tearDown(self):
+        local.localData.__dict__.clear()
+
+    def test_bad_response_reports_status_and_body(self):
+        from collective.elastic.redis import fetch
+
+        response = mock.Mock(status_code=401, text="Unauthorized: wrong password")
+        with mock.patch.object(fetch.get_session(), "get", return_value=response):
+            with self.assertRaises(Exception) as raised:
+                fetch.fetch_data("http://plone/site", "a-uid", ["Title"])
+        message = str(raised.exception)
+        self.assertIn("401", message)
+        self.assertIn("http://plone/site/@elasticsearch_extractdata", message)
+        self.assertIn("wrong password", message)
+
+
 class TestRedisUtils(BaseFunctionalTest):
     def test_redis_not_available_if_environ_vars_are_missing(self):
 
