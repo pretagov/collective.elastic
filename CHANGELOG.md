@@ -2,6 +2,8 @@
 
 ## 6.0.0 (unreleased)
 
+- Index the keys of mapping values in keyword indexes, as the catalog does @instification
+
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
 - Run next to collective.elasticsearch @instification
