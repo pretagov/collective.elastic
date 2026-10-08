@@ -1,14 +1,14 @@
 Installation
 ============
 
-collective.elasticsearch
+collective.elastic
 ------------------------
 
-To install collective.elasticsearch into the global Python environment (or a workingenv),
+To install collective.elastic into the global Python environment (or a workingenv),
 using a traditional Zope 2 instance, you can do this:
 
 * When you're reading this you have probably already run
-  ``easy_install collective.elasticsearch``. Find out how to install setuptools
+  ``easy_install collective.elastic``. Find out how to install setuptools
   (and EasyInstall) here:
   http://peak.telecommunity.com/DevCenter/EasyInstall
 
@@ -19,11 +19,11 @@ using a traditional Zope 2 instance, you can do this:
 
 into your Zope instance.
 
-* Create a file called ``collective.elasticsearch-configure.zcml`` in the
+* Create a file called ``collective.elastic-configure.zcml`` in the
   ``/path/to/instance/etc/package-includes`` directory.  The file
   should only contain this::
 
-    <include package="collective.elasticsearch" />
+    <include package="collective.elastic" />
 
 .. _pythonproducts: http://plone.org/products/pythonproducts
 
@@ -31,13 +31,13 @@ into your Zope instance.
 Alternatively, if you are using zc.buildout and the plone.recipe.zope2instance
 recipe to manage your project, you can do this:
 
-* Add ``collective.elasticsearch`` to the list of eggs to install, e.g.::
+* Add ``collective.elastic`` to the list of eggs to install, e.g.::
 
     [buildout]
     ...
     eggs =
         ...
-        collective.elasticsearch
+        collective.elastic
 
 * Tell the plone.recipe.zope2instance recipe to install a ZCML slug::
 
@@ -45,7 +45,7 @@ recipe to manage your project, you can do this:
     recipe = plone.recipe.zope2instance
     ...
     zcml =
-        collective.elasticsearch
+        collective.elastic
 
 * Re-run buildout, e.g. with::
 
