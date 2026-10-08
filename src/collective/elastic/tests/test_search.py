@@ -11,6 +11,8 @@ from plone import api
 from plone.app.textfield.value import RichTextValue
 from Products.ZCatalog.interfaces import ICatalogBrain
 
+import json
+
 
 EVENT_KLASS = "plone.app.event.dx.interfaces.IDXEvent"
 DOCUMENT_KLASS = "plone.app.contenttypes.interfaces.IDocument"
@@ -455,3 +457,18 @@ class TestSearchOnRemovedIndex(BaseFunctionalTest):
         )
         self.assertEqual(len(el_results), 1)
         self.assertEqual(el_results[0].getId, self.document.id)
+
+
+class TestDebugLogging(BaseFunctionalTest):
+    def test_request_body_is_logged_as_json_at_debug_level(self):
+        with self.assertLogs("collective.elastic", level="DEBUG") as logs:
+            self.search({"SearchableText": "anything"})
+        requests = [line for line in logs.output if "Elasticsearch request" in line]
+        self.assertEqual(len(requests), 1)
+        body = json.loads(requests[0].split(" body=", 1)[1])
+        self.assertIn("query", body)
+
+    def test_indexing_does_not_log_at_info_level(self):
+        api.content.create(self.portal, "Document", "quiet", title="Quiet")
+        with self.assertNoLogs("collective.elastic", level="INFO"):
+            self.commit()
