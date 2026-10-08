@@ -92,6 +92,15 @@ class IElasticSettings(Interface):
         title="Bulk Size", description="bulk size for elastic queries", default=50
     )
 
+    min_score = schema.Float(
+        title="Minimum Score",
+        description="Leave out full-text search results that score below this. "
+        "0 keeps all results.",
+        default=0.0,
+        min=0.0,
+        required=False,
+    )
+
     highlight = schema.Bool(
         title="Enable Search Highlight",
         description="Use elasticsearch highlight feature instead of descriptions in search results",
