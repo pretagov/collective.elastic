@@ -2,6 +2,8 @@
 
 ## 6.0.0 (unreleased)
 
+- Map all keyword indexes as elasticsearch keywords; existing indexes need a rebuild @mustap @instification
+
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
 - Run next to collective.elasticsearch @instification
