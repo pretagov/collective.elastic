@@ -2,6 +2,8 @@
 
 ## 6.0.0 (unreleased)
 
+- A blank full-text query no longer restricts the results @instification
+
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
 - Installing on a site with collective.elasticsearch migrates its settings and uninstalls it @instification

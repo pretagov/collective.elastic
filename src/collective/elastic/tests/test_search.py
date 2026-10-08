@@ -455,3 +455,64 @@ class TestSearchOnRemovedIndex(BaseFunctionalTest):
         )
         self.assertEqual(len(el_results), 1)
         self.assertEqual(el_results[0].getId, self.document.id)
+
+
+class TestBlankTextQuery(BaseFunctionalTest):
+    """A blank full-text value doesn't restrict the results.
+
+    Clients send an empty SearchableText, e.g. a search form submitted without
+    a term, together with filters; plone.app.querystring passes it on as
+    ``{"query": ""}``. The catalog's ZCTextIndex matches nothing for it, which
+    is rarely what a search form wants, so here it lists everything matching
+    the other criteria.
+    """
+
+    def setUp(self):
+        super().setUp()
+        for idx, subject in enumerate(("alpha", "beta")):
+            doc = api.content.create(
+                self.portal, "Document", f"doc{idx}", title=f"Document {subject}"
+            )
+            doc.setSubject((subject,))
+            doc.reindexObject()
+        event = api.content.create(self.portal, "Event", "event", title="Event")
+        event.setSubject(("alpha",))
+        event.reindexObject()
+        self.commit(wait=1)
+
+    def ids(self, query):
+        return {brain.getId for brain in self.search(query)}
+
+    @parameterized.expand([("",), ("   ",), ("*",), ({"query": ""},)])
+    def test_blank_text_with_filter(self, blank):
+        self.assertEqual(
+            self.ids({"SearchableText": blank, "portal_type": "Document"}),
+            {"doc0", "doc1"},
+        )
+
+    def test_blank_text_alone_lists_everything(self):
+        self.assertEqual(
+            self.ids({"SearchableText": "", "portal_type": ["Document", "Event"]}),
+            {"doc0", "doc1", "event"},
+        )
+
+    def test_term_still_restricts_with_filter(self):
+        self.assertEqual(
+            self.ids({"SearchableText": "alpha", "portal_type": "Document"}),
+            {"doc0"},
+        )
+
+    def test_blank_text_with_es_only_filter_index(self):
+        """A keyword index can be configured as ES only to have its filtering
+        done by elasticsearch."""
+        settings = get_settings()
+        settings.es_only_indexes = set(getESOnlyIndexes()) | {"Subject"}
+        self.assertEqual(
+            self.ids({"SearchableText": "", "Subject": ["alpha"]}), {"doc0", "event"}
+        )
+        self.assertEqual(
+            self.ids({"SearchableText": "event", "Subject": ["alpha"]}), {"event"}
+        )
+        self.assertEqual(
+            self.ids({"SearchableText": "beta", "Subject": ["alpha"]}), set()
+        )
