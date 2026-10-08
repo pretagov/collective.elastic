@@ -14,7 +14,10 @@ class HiddenProfiles:
 
 def post_install(context):  # NOQA W0613
     """Post install script"""
-    # Do something at the end of the installation of this package.
+    from collective.elastic import migration
+
+    # Take over from collective.elasticsearch, if the site has it
+    migration.migrate()
 
 
 def post_content(context):  # NOQA W0613

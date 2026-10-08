@@ -6,8 +6,8 @@
 
   <genericsetup:registerProfile
       name="default"
-      title="Elastic Search"
-      description="Installs the Elastic Search plone integration package"
+      title="Elastic Search (collective.elastic)"
+      description="Elasticsearch integration for the catalog. Installing it on a site with collective.elasticsearch moves its settings over and uninstalls it."
       provides="Products.GenericSetup.interfaces.EXTENSION"
       directory="profiles/default"
       post_handler=".setuphandlers.post_install"

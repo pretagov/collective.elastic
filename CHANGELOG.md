@@ -4,6 +4,8 @@
 
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
+- Installing on a site with collective.elasticsearch migrates its settings and uninstalls it @instification
+
 - Apply search highlighting to records that only live in elasticsearch. The hit was shadowed by the fetched record, so the highlight was silently dropped for those brains, and `ElasticSearchBrain` did not support item assignment at all @maethu
 
 - Let `has_key` and `in` on an elasticsearch only brain report the metadata columns declared by the catalog, like a real catalog brain does, instead of only the keys stored in the elasticsearch document @maethu

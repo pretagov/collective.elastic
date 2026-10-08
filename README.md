@@ -82,6 +82,16 @@ Now, go to `Add-on Configuration` and:
 You now have a insanely scalable modern search engine. Now live the life of the Mind!
 
 
+## Migrating from collective.elasticsearch
+
+Deploy `collective.elastic` next to `collective.elasticsearch` and install it in the site (Add-ons control panel, `@addons`, or the `collective.elastic:default` profile). While it isn't installed, `collective.elasticsearch` keeps searching and indexing as before. The install:
+
+1. copies every `collective.elasticsearch` setting to the `collective.elastic` setting of the same name, whatever version of `collective.elasticsearch` the site had. Settings without a counterpart, or with a value that doesn't fit, are logged and left out;
+2. disables `collective.elasticsearch` and uninstalls it, removing its settings, browser layer and profile version;
+3. leaves `collective.elastic` enabled if `collective.elasticsearch` was. The existing Elasticsearch index is used as it is, so no reindexing is needed.
+
+Afterwards `collective.elasticsearch` can be removed from the deployment. When using the Redis queue, let it drain first: pending jobs refer to `collective.elasticsearch`. The migration also cleans up a site from which the package has been removed already.
+
 ## Redis queue integration with blob indexing support
 
 ### TLDR
