@@ -1,5 +1,6 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
     xmlns:plone="http://namespaces.plone.org/plone"
     >
 
@@ -25,6 +26,16 @@
       for="Products.CMFCore.interfaces.ISiteRoot"
       permission="cmf.ManagePortal"
       name="@elasticsearch"
+      layer="collective.elastic.interfaces.IElasticSearchLayer"
+      />
+
+  <adapter factory=".facets.ElasticSearchResultsSerializer" />
+
+  <browser:page
+      name="querybuilderresults"
+      for="*"
+      class=".facets.FacetsQueryBuilder"
+      permission="zope2.View"
       layer="collective.elastic.interfaces.IElasticSearchLayer"
       />
 

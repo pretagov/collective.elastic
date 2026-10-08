@@ -2,6 +2,8 @@
 
 ## 6.0.0 (unreleased)
 
+- Count facets of keyword indexes with a `facets` catalog query parameter, also in @search and @querystring-search @instification
+
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
 - Run next to collective.elasticsearch @instification
