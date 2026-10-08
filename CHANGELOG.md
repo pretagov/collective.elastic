@@ -2,6 +2,8 @@
 
 ## 6.0.0 (unreleased)
 
+- Render the control panel when the cluster doesn't answer @instification
+
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
 - Run next to collective.elasticsearch @instification

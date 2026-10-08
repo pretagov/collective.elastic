@@ -168,6 +168,9 @@ class ElasticSearchManager:
         except NotFoundError:
             logger.warning("Error getting stats", exc_info=True)
             return []
+        except (exceptions.ConnectionError, exceptions.ConnectionTimeout):
+            logger.warning("Cannot connect to elasticsearch", exc_info=True)
+            return []
 
     @property
     def active(self):
