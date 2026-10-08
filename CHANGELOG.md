@@ -2,6 +2,8 @@
 
 ## 6.0.0 (unreleased)
 
+- Add a minimum score setting for full-text searches @instification
+
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
 - Run next to collective.elasticsearch @instification
