@@ -3,8 +3,7 @@ from .fetch import fetch_data
 from collective.elastic import local
 from collective.elastic.compat import es_bulk
 from collective.elastic.compat import es_update
-from collective.elastic.manager import ElasticSearchManager
-from elasticsearch import Elasticsearch
+from collective.elastic.manager import get_connection
 from rq import Queue
 from rq import Retry
 from rq.decorators import job
@@ -29,13 +28,7 @@ def redis_connection():
 
 
 def es_connection(hosts, **params):
-    connection = local.get_local(ElasticSearchManager.connection_key)
-    if not connection:
-        local.set_local(
-            ElasticSearchManager.connection_key, Elasticsearch(hosts, **params)
-        )
-        connection = local.get_local(ElasticSearchManager.connection_key)
-    return connection
+    return get_connection(hosts, params)
 
 
 queue = Queue(

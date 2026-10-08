@@ -2,6 +2,8 @@
 
 ## 6.0.0 (unreleased)
 
+- Rebuild the elasticsearch client when the connection settings change @instification
+
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
 - Run next to collective.elasticsearch @instification
