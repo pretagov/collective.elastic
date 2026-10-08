@@ -2,6 +2,8 @@
 
 ## 6.0.0 (unreleased)
 
+- Report the status and body of a bad response when fetching index data @instification
+
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
 - Run next to collective.elasticsearch @instification
