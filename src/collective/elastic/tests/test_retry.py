@@ -7,6 +7,10 @@ from plone import api
 from unittest import mock
 
 
+# The error elasticsearch answers a bad request with
+RequestError = getattr(exceptions, "ApiError", None) or exceptions.RequestError
+
+
 class TestSearchRetry(BaseFunctionalTest):
     """Searches are retried after a delay when the cluster can't be reached,
     e.g. while the network recovers after the host resumed from suspension."""
@@ -84,7 +88,7 @@ class TestSearchRetry(BaseFunctionalTest):
     def test_request_errors_are_not_retried(self):
         self.settings.retry_attempts = 2
         with self.count_searches() as es_search:
-            with self.assertRaises(exceptions.ApiError):
+            with self.assertRaises(RequestError):
                 # Title is a text field, which elasticsearch can't sort on
                 self.search({"SearchableText": "retry", "sort_on": "Title"})
         self.assertEqual(es_search.call_count, 1)
