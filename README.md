@@ -82,6 +82,18 @@ Now, go to `Add-on Configuration` and:
 You now have a insanely scalable modern search engine. Now live the life of the Mind!
 
 
+## Migrating from collective.elasticsearch
+
+`collective.elastic` can be deployed and installed next to `collective.elasticsearch`. Installing it changes nothing about `collective.elasticsearch`, which keeps searching and indexing. While `collective.elasticsearch` is enabled, `collective.elastic` can't be: its control panel greys out the Enabled checkbox and points to the migration.
+
+The migration is a form at `@@ce-migration` on the site (Manage portal permission). It lists every `collective.elasticsearch` setting with what copying it would do, and runs any of these steps:
+
+1. **Copy the settings**: every `collective.elasticsearch` setting goes to the `collective.elastic` setting of the same name, whatever version of `collective.elasticsearch` the site had. Settings without a counterpart, or with a value that doesn't fit, are left out.
+2. **Switch over**: checks that `collective.elastic`, with the settings it will have, reaches the cluster and can search the existing index, then disables `collective.elasticsearch` and enables `collective.elastic`. The index is used as it is, without reindexing. Differences in document counts or mappings are reported, for a Synchronize or Convert afterwards.
+3. **Uninstall collective.elasticsearch**, once it is disabled: removes its settings, browser layer and profile version, so that the package can be removed from the deployment. When using the Redis queue, let it drain first: pending jobs refer to `collective.elasticsearch`.
+
+The checks run before anything is changed; if one fails, nothing is. Restart the other instances after switching over if the hosts changed: a running instance may keep a connection to the hosts it had.
+
 ## Redis queue integration with blob indexing support
 
 ### TLDR

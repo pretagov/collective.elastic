@@ -1,0 +1,114 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      lang="en"
+      metal:use-macro="context/prefs_main_template/macros/master"
+      xml:lang="en"
+>
+
+  <body>
+    <div metal:fill-slot="prefs_configlet_main">
+      <a class="link-parent"
+         href="${view/controlpanel_url}"
+         id="setup-link"
+      >Elastic Search settings</a>
+      &rsaquo;
+      <h1 class="documentFirstHeading">${view/label}</h1>
+
+      <p class="documentDescription">
+        Move this site from collective.elasticsearch to collective.elastic.
+        The existing Elasticsearch index is kept and used as it is.
+      </p>
+
+      <div class="portalMessage error"
+           role="status"
+           tal:condition="not:view/installed"
+      >
+        <strong>Error</strong>
+        Install collective.elastic (Add-ons control panel) before migrating.
+        Installing it doesn't change collective.elasticsearch.
+      </div>
+
+      <div class="portalMessage info"
+           role="status"
+           tal:condition="python:view.installed and not view.pending"
+      >
+        <strong>Info</strong>
+        There is nothing of collective.elasticsearch left on this site.
+      </div>
+
+      <div id="ce-migration-report"
+           tal:define="report view/report"
+           tal:condition="report"
+      >
+        <h2>Result</h2>
+        <ul tal:condition="report/errors">
+          <li class="text-danger"
+              tal:repeat="error report/errors"
+          >${error}</li>
+        </ul>
+        <tal:ok condition="report/ok">
+          <ul>
+            <li tal:condition="report/copied">Copied:
+              ${python:', '.join(report.copied)}</li>
+            <li tal:condition="report/not_migrated">No setting of that name in collective.elastic:
+              ${python:', '.join(report.not_migrated)}</li>
+            <li tal:condition="report/invalid">Not valid for collective.elastic:
+              ${python:', '.join(report.invalid)}</li>
+            <li tal:condition="report/switched">Switched over: collective.elasticsearch is disabled, collective.elastic enabled.
+              Restart the other instances if the hosts changed: a running instance may keep its connection to the hosts it had.</li>
+            <li tal:condition="report/uninstalled">collective.elasticsearch is uninstalled and can be removed from the deployment.</li>
+          </ul>
+        </tal:ok>
+        <ul tal:condition="report/warnings">
+          <li class="text-warning"
+              tal:repeat="warning report/warnings"
+          >${warning}</li>
+        </ul>
+      </div>
+
+      <h2>State</h2>
+      <table class="listing table"
+             id="ce-migration-state"
+      >
+        <tbody>
+          <tr tal:repeat="row view/state">
+            <td>${python:row[0]}</td>
+            <td tal:define="value python:row[1]">${python:{True: 'yes', False: 'no'}.get(value, value)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <tal:settings define="settings view/settings"
+                    condition="settings"
+      >
+        <h2>Settings</h2>
+        <table class="listing table"
+               id="ce-migration-settings"
+        >
+          <thead>
+            <tr>
+              <th>Setting</th>
+              <th>collective.elasticsearch</th>
+              <th>collective.elastic</th>
+              <th>Copying it</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr tal:repeat="setting settings">
+              <td>${setting/name}</td>
+              <td>${python:repr(setting.old_value)}</td>
+              <td>${python:repr(setting.new_value) if setting.action != 'no counterpart' else ''}</td>
+              <td>${python:{'copy': 'copies it', 'same': 'same value', 'no counterpart': 'no such setting, not copied', 'invalid': 'not valid, not copied'}[setting.action]}</td>
+            </tr>
+          </tbody>
+        </table>
+      </tal:settings>
+
+      <fieldset tal:condition="view/installed">
+        <legend>Migration</legend>
+        <span tal:replace="structure view/contents" />
+      </fieldset>
+    </div>
+  </body>
+</html>
