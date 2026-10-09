@@ -11,6 +11,7 @@ from zope.component import getMultiAdapter
 from zope.globalrequest import getRequest
 from zope.interface import implementer
 from ZPublisher.BaseRequest import RequestContainer
+from ZTUtils.Lazy import LazyMap
 
 
 @implementer(ICatalogBrain)
@@ -116,8 +117,25 @@ def BrainFactory(manager):
     return factory
 
 
+@implementer(interfaces.IElasticSearchResults)
+class ElasticSearchResults(LazyMap):
+    """Catalog results that also carry the facet counts of the search."""
+
+    def __init__(self, func, seq, length=None, facets=None):
+        super().__init__(func, seq, length)
+        self.facets = facets or {}
+
+
+def bucket_counts(aggregation: dict) -> dict:
+    """The value counts of a terms aggregation."""
+    return {
+        bucket.get("key_as_string", str(bucket["key"])): bucket["doc_count"]
+        for bucket in aggregation["buckets"]
+    }
+
+
 class ElasticResult:
-    def __init__(self, manager, query, **query_params):
+    def __init__(self, manager, query, aggs=None, **query_params):
         assert "sort" not in query_params
         assert "start" not in query_params
         self.manager = manager
@@ -132,9 +150,16 @@ class ElasticResult:
         # but the start index of the bulk size for the
         # results it holds. This way we can skip around
         # for result data in a result object
-        result = manager._search(self.query, sort=self.sort, **query_params)["hits"]
+        response = manager._search(
+            self.query, sort=self.sort, aggs=aggs, **query_params
+        )
+        result = response["hits"]
         self.results = {0: result["hits"]}
         self.count = result["total"]["value"]
+        self.facets = {
+            name: bucket_counts(aggregation)
+            for name, aggregation in response.get("aggregations", {}).items()
+        }
         self.query_params = query_params
 
     def __len__(self):

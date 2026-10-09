@@ -10,8 +10,10 @@ from collective.elastic.compat import indices_put_mapping
 from collective.elastic.compat import indices_put_settings
 from collective.elastic.compat import ingest_put_pipeline
 from collective.elastic.events import BlobIndexJobCreated
+from collective.elastic.indexes import getIndex
 from collective.elastic.result import BrainFactory
 from collective.elastic.result import ElasticResult
+from collective.elastic.result import ElasticSearchResults
 from collective.elastic.utils import use_redis
 from DateTime import DateTime
 from elasticsearch import Elasticsearch
@@ -39,6 +41,12 @@ import warnings
 CONVERTED_ATTR = "_elasticconverted"
 CUSTOM_INDEX_NAME_ATTR = "_elasticcustomindex"
 INDEX_VERSION_ATTR = "_elasticindexversion"
+
+# Number of values counted per facet, unless the query asks for another size
+FACET_SIZE = 100
+# Indexes that can't be used as facets: their values would disclose users and
+# groups to anyone allowed to search
+FACET_EXCLUDED_INDEXES = frozenset(["allowedRolesAndUsers"])
 
 
 def get_connection(hosts, params) -> Elasticsearch:
@@ -465,7 +473,33 @@ class ElasticSearchManager:
             plone_url = backend_host + "/".join(api.portal.get().getPhysicalPath())
         return plone_url
 
-    def _search(self, query, sort=None, **query_params):
+    def facet_aggregations(self, facets) -> dict:
+        """Terms aggregations for the requested facets.
+
+        ``facets`` is a list of index names, or a mapping of index name to the
+        number of values to count. Only keyword and boolean indexes can be
+        counted; other names are ignored.
+        """
+        if not facets:
+            return {}
+        if isinstance(facets, str):
+            facets = [facets]
+        if not isinstance(facets, dict):
+            facets = {name: FACET_SIZE for name in facets}
+        aggs = {}
+        for name, size in facets.items():
+            index = getIndex(self.catalog, name)
+            if (
+                index is None
+                or name in FACET_EXCLUDED_INDEXES
+                or index.create_mapping(name).get("type") not in ("keyword", "boolean")
+            ):
+                logger.debug(f"Ignoring facet {name!r}: not a keyword index")
+                continue
+            aggs[name] = {"terms": {"field": name, "size": int(size)}}
+        return aggs
+
+    def _search(self, query, sort=None, aggs=None, **query_params):
         """ """
         if "start" in query_params:
             query_params["from_"] = query_params.pop("start")
@@ -480,6 +514,8 @@ class ElasticSearchManager:
         if min_score and query.get("bool", {}).get("should"):
             # Only full-text clauses score; a filter only query scores 0
             body["min_score"] = min_score
+        if aggs:
+            body["aggs"] = aggs
         warnings.simplefilter("ignore", ResourceWarning)
         if self.highlight:
             body["highlight"] = {
@@ -500,22 +536,30 @@ class ElasticSearchManager:
             )
         return self._search_with_retry(body, **query_params)
 
-    def search(self, query: dict, factory=None, **query_params) -> LazyMap:
+    def search(self, query: dict, factory=None, facets=None, **query_params) -> LazyMap:
         """
         @param query: The Plone query
         @param factory: The factory that maps each elastic search result.
             By default, get the plone catalog brain.
+        @param facets: Index names to count the values of, see
+            facet_aggregations. The counts are in the ``facets`` attribute of
+            the results.
         @param query_params: Parameters to pass to the search method
             'stored_fields': the list of fields to get from stored source
         """
         factory = BrainFactory(self)
-        result = ElasticResult(self, query, **query_params)
-        return LazyMap(factory, result, result.count)
+        result = ElasticResult(
+            self, query, aggs=self.facet_aggregations(facets), **query_params
+        )
+        return ElasticSearchResults(factory, result, result.count, facets=result.facets)
 
     def search_results(self, request=None, check_perms=False, **kw):
         # Make sure any pending index tasks have been processed
         processQueue()
-        if not (self.active and utils.getESOnlyIndexes().intersection(kw.keys())):
+        # Facets can only be counted by elasticsearch
+        facets = kw.pop("facets", None)
+        uses_es = facets or utils.getESOnlyIndexes().intersection(kw.keys())
+        if not (self.active and uses_es):
             method = (
                 self.catalog._old_searchResults
                 if check_perms
@@ -541,7 +585,7 @@ class ElasticSearchManager:
         orig_query = query.copy()
         logger.debug(f"Running query: {orig_query}")
         try:
-            return self.search(query)
+            return self.search(query, facets=facets)
         except Exception:  # NOQA W0703
             if self.raise_search_exception is True:
                 raise

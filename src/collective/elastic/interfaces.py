@@ -11,6 +11,14 @@ class IElasticSearchLayer(Interface):
     pass
 
 
+class IElasticSearchResults(Interface):
+    """Search results from elasticsearch.
+
+    ``facets`` maps each requested facet to the counts of its values, e.g.
+    ``{"Subject": {"news": 3, "events": 1}}``.
+    """
+
+
 class IElasticSearchManager(Interface):
     pass
 

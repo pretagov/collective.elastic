@@ -12,6 +12,7 @@
 - Log bulk calls and search requests at debug level @instification
 - Add a minimum score setting for full-text searches @instification
 - Add settings to retry searches after a delay when the cluster can't be reached @instification
+- Count facets of keyword indexes with a `facets` catalog query parameter, also in @search and @querystring-search @instification
 
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
