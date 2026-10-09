@@ -32,6 +32,7 @@ from ZTUtils.Lazy import LazyMap
 import json
 import logging
 import os
+import time
 import warnings
 
 
@@ -97,6 +98,28 @@ class ElasticSearchManager:
         except KeyError:
             value = 0.0
         return value or 0.0
+
+    @property
+    def retry_attempts(self) -> int:
+        """How often to retry a search the cluster didn't answer."""
+        try:
+            value = api.portal.get_registry_record(
+                "retry_attempts", interfaces.IElasticSettings, 0
+            )
+        except KeyError:
+            value = 0
+        return value or 0
+
+    @property
+    def retry_delay(self) -> float:
+        """Seconds to wait before retrying a search."""
+        try:
+            value = api.portal.get_registry_record(
+                "retry_delay", interfaces.IElasticSettings, 5.0
+            )
+        except KeyError:
+            value = 5.0
+        return 5.0 if value is None else value
 
     @property
     def highlight(self):
@@ -400,9 +423,36 @@ class ElasticSearchManager:
             self._bulk_call(batch)
             calls += 1
 
+    def _reset_connection(self):
+        """Drop this thread's client, so the next request opens new sockets."""
+        local.set_local(self.connection_key, None)
+
+    def _search_with_retry(self, body, **query_params):
+        """Search, retrying when the cluster can't be reached or times out.
+
+        The client retries straight away, which doesn't help while the network
+        is still unavailable, e.g. just after the host resumed from suspension,
+        or while a cold cluster is slow to answer. Each retry waits first and
+        starts from a new client, without node addresses that may have moved.
+        """
+        attempts = self.retry_attempts
+        for attempt in range(attempts + 1):
+            try:
+                return es_search(self.connection, self.index_name, body, **query_params)
+            except (exceptions.ConnectionError, exceptions.ConnectionTimeout) as exc:
+                if attempt == attempts:
+                    raise
+                delay = self.retry_delay
+                logger.warning(
+                    f"Elasticsearch search failed: {exc!r}. "
+                    f"Retrying in {delay}s ({attempt + 1}/{attempts})"
+                )
+                self._reset_connection()
+                time.sleep(delay)
+
     def get_record_by_path(self, path: str) -> dict:
         body = {"query": {"match": {"path.path": path}}}
-        results = es_search(self.connection, self.index_name, body)
+        results = self._search_with_retry(body)
         hits = results.get("hits", {}).get("hits", [])
         record = hits[0]["_source"] if hits else {}
         return record
@@ -448,7 +498,7 @@ class ElasticSearchManager:
                 query_params,
                 json.dumps(body, default=str),
             )
-        return es_search(self.connection, self.index_name, body, **query_params)
+        return self._search_with_retry(body, **query_params)
 
     def search(self, query: dict, factory=None, **query_params) -> LazyMap:
         """

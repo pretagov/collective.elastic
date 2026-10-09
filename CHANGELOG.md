@@ -11,6 +11,7 @@
 - Report the status and body of a bad response when fetching index data @instification
 - Log bulk calls and search requests at debug level @instification
 - Add a minimum score setting for full-text searches @instification
+- Add settings to retry searches after a delay when the cluster can't be reached @instification
 
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
