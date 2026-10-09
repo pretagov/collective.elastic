@@ -38,11 +38,30 @@ CUSTOM_INDEX_NAME_ATTR = "_elasticcustomindex"
 INDEX_VERSION_ATTR = "_elasticindexversion"
 
 
+def get_connection(hosts, params) -> Elasticsearch:
+    """The elasticsearch client of this thread for the given settings.
+
+    The client is cached per thread together with the settings it was built
+    from, and rebuilt once they change, e.g. after the hosts are saved in the
+    control panel. Each thread notices the change on its next use.
+    """
+    settings = (tuple(hosts), tuple(sorted(params.items())))
+    conn = local.get_local(ElasticSearchManager.connection_key)
+    if conn is None or (
+        local.get_local(ElasticSearchManager.connection_settings_key) != settings
+    ):
+        conn = Elasticsearch(hosts, **get_serializer_params(), **params)
+        local.set_local(ElasticSearchManager.connection_key, conn)
+        local.set_local(ElasticSearchManager.connection_settings_key, settings)
+    return conn
+
+
 @implementer(interfaces.IElasticSearchManager)
 class ElasticSearchManager:
 
     _catalog: CatalogTool = None
     connection_key = "elasticsearch_connection"
+    connection_settings_key = "elasticsearch_connection_settings"
 
     @property
     def raise_search_exception(self):
@@ -298,15 +317,8 @@ class ElasticSearchManager:
 
     @property
     def connection(self) -> Elasticsearch:
-        conn = local.get_local(self.connection_key)
-        if not conn:
-            hosts, params = utils.get_connection_settings()
-            local.set_local(
-                self.connection_key,
-                Elasticsearch(hosts, **get_serializer_params(), **params),
-            )
-            conn = local.get_local(self.connection_key)
-        return conn
+        hosts, params = utils.get_connection_settings()
+        return get_connection(hosts, params)
 
     def _bulk_call(self, batch):
         method = self._bulk_call_direct
