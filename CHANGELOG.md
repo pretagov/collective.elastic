@@ -7,6 +7,7 @@
 - Map all keyword indexes as elasticsearch keywords; existing indexes need a rebuild @mustap @instification
 - Rebuild the elasticsearch client when the connection settings change @instification
 - A blank full-text query no longer restricts the results @instification
+- Render the control panel when the cluster doesn't answer @instification
 
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
