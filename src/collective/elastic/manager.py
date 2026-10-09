@@ -88,6 +88,17 @@ class ElasticSearchManager:
         return value
 
     @property
+    def min_score(self) -> float:
+        """Minimum score of full-text search results."""
+        try:
+            value = api.portal.get_registry_record(
+                "min_score", interfaces.IElasticSettings, 0.0
+            )
+        except KeyError:
+            value = 0.0
+        return value or 0.0
+
+    @property
     def highlight(self):
         """Is search highlighting enabled in the control panel."""
         try:
@@ -415,6 +426,10 @@ class ElasticSearchManager:
         body = {"query": query}
         if sort is not None:
             body["sort"] = sort
+        min_score = self.min_score
+        if min_score and query.get("bool", {}).get("should"):
+            # Only full-text clauses score; a filter only query scores 0
+            body["min_score"] = min_score
         warnings.simplefilter("ignore", ResourceWarning)
         if self.highlight:
             body["highlight"] = {
