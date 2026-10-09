@@ -6,6 +6,7 @@
 - Index the keys of mapping values in keyword indexes, as the catalog does @instification
 - Map all keyword indexes as elasticsearch keywords; existing indexes need a rebuild @mustap @instification
 - Rebuild the elasticsearch client when the connection settings change @instification
+- A blank full-text query no longer restricts the results @instification
 
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 

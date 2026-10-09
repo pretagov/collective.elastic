@@ -224,7 +224,10 @@ class EZCTextIndex(BaseIndex):
     def get_query(self, name, value):
         value = self._normalize_query(value)
         # ES doesn't care about * like zope catalog does
-        clean_value = value.strip("*") if value else ""
+        clean_value = value.strip().strip("*").strip() if value else ""
+        if not clean_value:
+            # A blank text query doesn't restrict the results, as in the catalog
+            return None
         queries = [{"match_phrase": {name: {"query": clean_value, "slop": 2}}}]
         if name in ("Title", "SearchableText"):
             # titles have most importance... we override here...
