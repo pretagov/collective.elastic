@@ -1,5 +1,6 @@
 from Acquisition import aq_base
 from Acquisition import aq_parent
+from collections.abc import Mapping
 from collective.elastic import logger
 from datetime import date
 from datetime import datetime
@@ -109,6 +110,14 @@ class BaseIndex:
 
 
 class EKeywordIndex(BaseIndex):
+    def get_value(self, obj):
+        value = super().get_value(obj)
+        if isinstance(value, Mapping):
+            # Like the catalog's KeywordIndex, index the keys of a mapping, e.g.
+            # plone.volto's block_types, a Counter of block type to count.
+            return list(value)
+        return value
+
     def extract(self, name, data):
         return data[name] or []
 
