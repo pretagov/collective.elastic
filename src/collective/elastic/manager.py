@@ -29,6 +29,8 @@ from zope.interface import implementer
 from zope.interface.interfaces import ComponentLookupError
 from ZTUtils.Lazy import LazyMap
 
+import json
+import logging
 import os
 import warnings
 
@@ -331,7 +333,7 @@ class ElasticSearchManager:
 
     def _bulk_call_direct(self, batch):
         data = [item for sublist in batch for item in sublist]
-        logger.info(f"Bulk call with {len(data)} entries and {len(batch)} actions.")
+        logger.debug(f"Bulk call with {len(data)} entries and {len(batch)} actions.")
         result = es_bulk(self.connection, self.index_name, data)
         if "errors" in result and result["errors"] is True:
             logger.error(f"Error in bulk operation: {result}")
@@ -339,7 +341,7 @@ class ElasticSearchManager:
     def _bulk_call_redis(self, batch):
         from collective.elastic.redis.tasks import bulk_update
 
-        logger.info(f"Bulk call with {len(batch)} entries and {len(batch)} actions.")
+        logger.debug(f"Bulk call with {len(batch)} entries and {len(batch)} actions.")
         hosts, params = utils.get_connection_settings()
 
         bulk_update.delay(
@@ -349,7 +351,7 @@ class ElasticSearchManager:
             body=batch,
             plone_url=self.get_plone_url(),
         )
-        logger.info("redis task created")
+        logger.debug("redis task created")
 
     def update_blob(self, item):
         from collective.elastic.redis.tasks import update_file_data
@@ -365,7 +367,7 @@ class ElasticSearchManager:
                 plone_url=self.get_plone_url(),
             )
             notify(BlobIndexJobCreated(uid=item[0], job=job))
-            logger.info("redis task to index blob data created")
+            logger.debug("redis task to index blob data created")
 
     def flush_indices(self):
         self.connection.indices.flush()
@@ -425,6 +427,12 @@ class ElasticSearchManager:
                 "pre_tags": self.highlight_pre_tags.split("\n"),
                 "post_tags": self.highlight_post_tags.split("\n"),
             }
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(
+                "Elasticsearch request params=%s body=%s",
+                query_params,
+                json.dumps(body, default=str),
+            )
         return es_search(self.connection, self.index_name, body, **query_params)
 
     def search(self, query: dict, factory=None, **query_params) -> LazyMap:

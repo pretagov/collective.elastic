@@ -9,6 +9,7 @@
 - A blank full-text query no longer restricts the results @instification
 - Render the control panel when the cluster doesn't answer @instification
 - Report the status and body of a bad response when fetching index data @instification
+- Log bulk calls and search requests at debug level @instification
 
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
