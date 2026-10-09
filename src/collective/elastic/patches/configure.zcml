@@ -1,0 +1,82 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:monkey="http://namespaces.plone.org/monkey"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="collective.elastic"
+    >
+
+  <!-- CMFPlone CatalogTool patches. They are applied after the default order,
+       so that while collective.elasticsearch is still installed (before the
+       migration) its patches are kept and called while this add-on isn't
+       active; see preserve_previous. -->
+  <monkey:patch
+      original="searchResults"
+      replacement=".safeSearchResults"
+      class="Products.CMFPlone.CatalogTool.CatalogTool"
+      description="searchResults"
+      handler=".preserve_previous"
+      order="1100"
+      />
+  <monkey:patch
+      original="__call__"
+      replacement=".safeSearchResults"
+      class="Products.CMFPlone.CatalogTool.CatalogTool"
+      description="searchResults"
+      handler=".preserve_previous"
+      order="1100"
+      />
+  <monkey:patch
+      original="unrestrictedSearchResults"
+      replacement=".unrestrictedSearchResults"
+      class="Products.CMFPlone.CatalogTool.CatalogTool"
+      description="unrestrictedSearchResults"
+      handler=".preserve_previous"
+      order="1100"
+      />
+  <monkey:patch
+      original="manage_catalogRebuild"
+      replacement=".manage_catalogRebuild"
+      class="Products.CMFPlone.CatalogTool.CatalogTool"
+      description="manage_catalogRebuild"
+      handler=".preserve_previous"
+      order="1100"
+      />
+  <monkey:patch
+      original="manage_catalogClear"
+      replacement=".manage_catalogClear"
+      class="Products.CMFPlone.CatalogTool.CatalogTool"
+      description="manage_catalogClear"
+      handler=".preserve_previous"
+      order="1100"
+      />
+
+  <monkey:patch
+      original="uncatalog_object"
+      replacement=".uncatalog_object"
+      class="Products.CMFPlone.CatalogTool.CatalogTool"
+      description="uncatalog_object"
+      handler=".preserve_previous"
+      order="1100"
+      />
+  <!-- Reordering support -->
+  <configure zcml:condition="not-have plone-60">
+    <monkey:patch
+        original="moveObjectsByDelta"
+        replacement=".moveObjectsByDelta"
+        class="Products.CMFPlone.Portal.PloneSite"
+        description="moveObjectsByDelta"
+        handler=".preserve_previous"
+      order="1100"
+        />
+  </configure>
+
+  <monkey:patch
+      original="moveObjectsByDelta"
+      replacement=".moveObjectsByDelta"
+      class="plone.folder.default.DefaultOrdering"
+      description="moveObjectsByDelta"
+      handler=".preserve_previous"
+      order="1100"
+      />
+
+</configure>

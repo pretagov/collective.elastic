@@ -13,5 +13,5 @@ default_context:
     initial_user_name: admin
     initial_user_password: admin
     load_zcml:
-        package_includes: ['collective.elasticsearch']
+        package_includes: ['collective.elastic']
     db_storage: direct

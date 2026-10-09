@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# collective.elasticsearch documentation build configuration file, created by
+# collective.elastic documentation build configuration file, created by
 # sphinx-quickstart on Mon Mar 13 15:04:25 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -45,7 +45,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'collective.elasticsearch'
+project = u'collective.elastic'
 copyright = u'Nathan Van Gheem (vangheem)'
 author = u'Nathan Van Gheem (vangheem)'
 
@@ -202,7 +202,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'collective.elasticsearchdoc'
+htmlhelp_basename = 'collective.elasticdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -224,7 +224,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'collectiveelasticsearch.tex', u'collective.elasticsearch Documentation',
+  ('index', 'collectiveelastic.tex', u'collective.elastic Documentation',
    u'Nathan Van Gheem', 'manual'),
 ]
 
@@ -254,7 +254,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'collectiveelasticsearch', u'collective.elasticsearch Documentation',
+    ('index', 'collectiveelastic', u'collective.elastic Documentation',
      [u'Nathan Van Gheem'], 1)
 ]
 
@@ -268,8 +268,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'collectiveelasticsearch', u'collective.elasticsearch Documentation',
-   u'Nathan Van Gheem', 'collectiveelasticsearch', 'One line description of project.',
+  ('index', 'collectiveelastic', u'collective.elastic Documentation',
+   u'Nathan Van Gheem', 'collectiveelastic', 'One line description of project.',
    'Miscellaneous'),
 ]
 

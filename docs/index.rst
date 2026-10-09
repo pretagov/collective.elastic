@@ -1,9 +1,9 @@
-.. collective.elasticsearch documentation master file, created by
+.. collective.elastic documentation master file, created by
    sphinx-quickstart on Mon Mar 13 15:04:25 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to collective.elasticsearch's documentation!
+Welcome to collective.elastic's documentation!
 ====================================================
 
 Overview

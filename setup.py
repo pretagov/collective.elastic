@@ -1,4 +1,4 @@
-"""Installer for the collective.elasticsearch package."""
+"""Installer for the collective.elastic package."""
 from pathlib import Path
 from setuptools import find_namespace_packages
 from setuptools import setup
@@ -11,9 +11,9 @@ long_description = f"""
 
 
 setup(
-    name="collective.elasticsearch",
-    version="5.0.1.dev0",
-    description="elasticsearch integration with plone",
+    name="collective.elastic",
+    version="6.0.0.dev0",
+    description="Elasticsearch integration with Plone, a fork of collective.elasticsearch",
     long_description=long_description,
     long_description_content_type="text/markdown",
     # Get more from https://pypi.org/classifiers/
@@ -42,11 +42,11 @@ setup(
     keywords="plone elasticsearch search indexing",
     author="Nathan Van Gheem",
     author_email="vangheem@gmail.com",
-    url="https://github.com/collective/collective.elasticsearch",
+    url="https://github.com/pretagov/collective.elastic",
     project_urls={
-        "PyPI": "https://pypi.python.org/pypi/collective.elasticsearch",
-        "Source": "https://github.com/collective/collective.elasticsearch",
-        "Tracker": "https://github.com/collective/collective.elasticsearch/issues",
+        "PyPI": "https://pypi.python.org/pypi/collective.elastic",
+        "Source": "https://github.com/pretagov/collective.elastic",
+        "Tracker": "https://github.com/pretagov/collective.elastic/issues",
     },
     license="GPL version 2",
     packages=find_namespace_packages(
@@ -85,6 +85,6 @@ setup(
     entry_points="""
     [plone.autoinclude.plugin]
     target = plone
-    module = collective.elasticsearch
+    module = collective.elastic
     """,
 )

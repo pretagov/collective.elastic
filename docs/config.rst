@@ -23,7 +23,7 @@ end up having conflicts. In that case, you may want to manually set the index us
 to the ``__init__.py`` file of your module::
 
     from Products.CMFPlone.CatalogTool import CatalogTool
-    from collective.elasticsearch.es import CUSTOM_INDEX_NAME_ATTR
+    from collective.elastic.es import CUSTOM_INDEX_NAME_ATTR
 
     setattr(CatalogTool, CUSTOM_INDEX_NAME_ATTR, "my_elasticsearch_custom_index")
 
@@ -36,9 +36,9 @@ the _default_mapping attribute to add your own indexes::
 
     <adapter
         factory=".mapping.MyMappingAdapter"
-        provides="collective.elasticsearch.interfaces.IMappingProvider"
+        provides="collective.elastic.interfaces.IMappingProvider"
         for="zope.interface.Interface
-             collective.elasticsearch.interfaces.IElasticSearchCatalog"
+             collective.elastic.interfaces.IElasticSearchCatalog"
         layer=".layers.MyLayer" />
 
 ::

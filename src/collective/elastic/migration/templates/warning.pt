@@ -1,0 +1,20 @@
+<div class="portalMessage ${python:'warning' if view.running else 'info'}"
+     id="ce-migration-warning"
+     role="status"
+     tal:condition="view/available"
+>
+  <tal:running condition="view/running">
+    <strong>Warning</strong>
+    collective.elasticsearch is enabled on this site, so collective.elastic can't be enabled next to it.
+    Use the
+    <a href="${view/navigation_root_url}/@@ce-migration">migration from collective.elasticsearch</a>
+    to copy its settings and switch over.
+  </tal:running>
+  <tal:left condition="not:view/running">
+    <strong>Info</strong>
+    This site still has collective.elasticsearch settings.
+    The
+    <a href="${view/navigation_root_url}/@@ce-migration">migration from collective.elasticsearch</a>
+    can copy them and uninstall collective.elasticsearch.
+  </tal:left>
+</div>

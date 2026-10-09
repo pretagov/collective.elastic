@@ -1,26 +1,28 @@
-<h1 align="center">collective.elasticsearch</h1>
+<h1 align="center">collective.elastic</h1>
 
 <div align="center">
 
-[![PyPI](https://img.shields.io/pypi/v/collective.elasticsearch)](https://pypi.org/project/collective.elasticsearch/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/collective.elasticsearch)](https://pypi.org/project/collective.elasticsearch/)
-[![PyPI - Wheel](https://img.shields.io/pypi/wheel/collective.elasticsearch)](https://pypi.org/project/collective.elasticsearch/)
-[![PyPI - License](https://img.shields.io/pypi/l/collective.elasticsearch)](https://pypi.org/project/collective.elasticsearch/)
-[![PyPI - Status](https://img.shields.io/pypi/status/collective.elasticsearch)](https://pypi.org/project/collective.elasticsearch/)
+[![PyPI](https://img.shields.io/pypi/v/collective.elastic)](https://pypi.org/project/collective.elastic/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/collective.elastic)](https://pypi.org/project/collective.elastic/)
+[![PyPI - Wheel](https://img.shields.io/pypi/wheel/collective.elastic)](https://pypi.org/project/collective.elastic/)
+[![PyPI - License](https://img.shields.io/pypi/l/collective.elastic)](https://pypi.org/project/collective.elastic/)
+[![PyPI - Status](https://img.shields.io/pypi/status/collective.elastic)](https://pypi.org/project/collective.elastic/)
 
 
-[![PyPI - Plone Versions](https://img.shields.io/pypi/frameworkversions/plone/collective.elasticsearch)](https://pypi.org/project/collective.elasticsearch/)
+[![PyPI - Plone Versions](https://img.shields.io/pypi/frameworkversions/plone/collective.elastic)](https://pypi.org/project/collective.elastic/)
 
-[![Code analysis checks](https://github.com/collective/collective.elasticsearch/actions/workflows/code-analysis.yml/badge.svg)](https://github.com/collective/collective.elasticsearch/actions/workflows/code-analysis.yml)
-[![Tests](https://github.com/collective/collective.elasticsearch/actions/workflows/tests.yml/badge.svg)](https://github.com/collective/collective.elasticsearch/actions/workflows/tests.yml)
+[![Code analysis checks](https://github.com/pretagov/collective.elastic/actions/workflows/code-analysis.yml/badge.svg)](https://github.com/pretagov/collective.elastic/actions/workflows/code-analysis.yml)
+[![Tests](https://github.com/pretagov/collective.elastic/actions/workflows/tests.yml/badge.svg)](https://github.com/pretagov/collective.elastic/actions/workflows/tests.yml)
 ![Code Style](https://img.shields.io/badge/Code%20Style-Black-000000)
 
-[![GitHub contributors](https://img.shields.io/github/contributors/collective/collective.elasticsearch)](https://github.com/collective/collective.elasticsearch)
-[![GitHub Repo stars](https://img.shields.io/github/stars/collective/collective.elasticsearch?style=social)](https://github.com/collective/collective.elasticsearch)
+[![GitHub contributors](https://img.shields.io/github/contributors/pretagov/collective.elastic)](https://github.com/pretagov/collective.elastic)
+[![GitHub Repo stars](https://img.shields.io/github/stars/pretagov/collective.elastic?style=social)](https://github.com/pretagov/collective.elastic)
 
 </div>
 
 ## Introduction
+
+`collective.elastic` is a fork of [collective.elasticsearch](https://github.com/collective/collective.elasticsearch), based on its `6.x` branch. It carries changes that are offered upstream but not released there yet. The Python package, GenericSetup profile and registry records are named `collective.elastic`, so it is installed and configured as a separate add-on.
 
 This package aims to index all fields the portal_catalog indexes and allows you to delete the `Title`, `Description` and `SearchableText` indexes which can provide significant improvement to performance and RAM usage.
 
@@ -61,12 +63,12 @@ curl http://localhost:9200/
 ```
 And you should see the Hudsucker Proxy reference? "You Know, for Search"
 
-## Install collective.elasticsearch
+## Install collective.elastic
 
-First, add `collective.elasticsearch` to your package dependencies, or install it with `pip` (the same one used by your Plone installation):
+First, add `collective.elastic` to your package dependencies, or install it with `pip` (the same one used by your Plone installation):
 
 ```shell
-pip install collective.elasticsearch
+pip install collective.elastic
 ```
 
 Restart Plone, and go to the `Control Panel`, click in `Add-ons`, and select `Elastic Search`.
@@ -79,6 +81,18 @@ Now, go to `Add-on Configuration` and:
 
 You now have a insanely scalable modern search engine. Now live the life of the Mind!
 
+
+## Migrating from collective.elasticsearch
+
+`collective.elastic` can be deployed and installed next to `collective.elasticsearch`. Installing it changes nothing about `collective.elasticsearch`, which keeps searching and indexing. While `collective.elasticsearch` is enabled, `collective.elastic` can't be: its control panel greys out the Enabled checkbox and points to the migration.
+
+The migration is a form at `@@ce-migration` on the site (Manage portal permission). It lists every `collective.elasticsearch` setting with what copying it would do, and runs any of these steps:
+
+1. **Copy the settings**: every `collective.elasticsearch` setting goes to the `collective.elastic` setting of the same name, whatever version of `collective.elasticsearch` the site had. Settings without a counterpart, or with a value that doesn't fit, are left out.
+2. **Switch over**: checks that `collective.elastic`, with the settings it will have, reaches the cluster and can search the existing index, then disables `collective.elasticsearch` and enables `collective.elastic`. The index is used as it is, without reindexing. Differences in document counts or mappings are reported, for a Synchronize or Convert afterwards.
+3. **Uninstall collective.elasticsearch**, once it is disabled: removes its settings, browser layer and profile version, so that the package can be removed from the deployment. When using the Redis queue, let it drain first: pending jobs refer to `collective.elasticsearch`.
+
+The checks run before anything is changed; if one fails, nothing is. Restart the other instances after switching over if the hosts changed: a running instance may keep a connection to the hosts it had.
 
 ## Redis queue integration with blob indexing support
 
@@ -99,7 +113,7 @@ Your Plone site should be up and running: http://localhost:8080/Plone
 
 Having a queue, which does heavy and time consuming jobs asynchronous improves the responsiveness of the website and lowers
 the risk of having database conflicts. This implementation aims to have an almost zero impact in terms of performance for any given plone
-installation or given installation using collective.elasticsearch already
+installation or given installation using collective.elastic already
 
 ### How does it work
 
@@ -127,9 +141,9 @@ Trade of: Instead of a fully indexed document in elasticsearch we have pretty fa
 There are a couple things that need to be done manually if you want redis queue support.
 
 
-1. Install redis extra from collective.elasticsearch
+1. Install redis extra from collective.elastic
 ```shell
-pip install collective.elasticsearch[redis]
+pip install collective.elastic[redis]
 ```
 
 
@@ -197,7 +211,7 @@ make worker
 #### Pipeline
 
 If you hit convert in the control panel and you meet all the requirements to index blobs as well,
-collective.elasticsearch installs a default pipeline for the plone-index.
+collective.elastic installs a default pipeline for the plone-index.
 This Pipeline coverts the binary data to text (if possible) and extends the searchableText index with the extracted data
 The setup uses multiple nested processors in order to extract all binary data from all fields (blob fields).
 

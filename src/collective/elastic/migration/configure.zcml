@@ -1,0 +1,76 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="collective.elastic"
+    >
+
+  <!-- Moving a site from collective.elasticsearch: fork only, kept apart
+       from the rest of the package -->
+
+  <browser:page
+      name="ce-migration"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      class=".browser.MigrationView"
+      permission="cmf.ManagePortal"
+      />
+
+  <!-- While collective.elasticsearch is installed too, both packages have
+       these views, with the same names, on their own layers, and which
+       layer comes first depends on the order they were installed in.
+       Registered for the classes, collective.elastic's are the more specific
+       and win. -->
+  <browser:page
+      name="elastic-controlpanel"
+      for="Products.CMFPlone.Portal.PloneSite"
+      class="collective.elastic.browser.controlpanel.ElasticControlPanelView"
+      permission="cmf.ManagePortal"
+      layer="collective.elastic.interfaces.IElasticSearchLayer"
+      />
+
+  <browser:page
+      name="elastic-convert"
+      for="Products.CMFPlone.CatalogTool.CatalogTool"
+      class="collective.elastic.browser.utilviews.Utils"
+      attribute="convert"
+      permission="cmf.ManagePortal"
+      layer="collective.elastic.interfaces.IElasticSearchLayer"
+      />
+
+  <browser:page
+      name="elastic-rebuild"
+      for="Products.CMFPlone.CatalogTool.CatalogTool"
+      class="collective.elastic.browser.utilviews.Utils"
+      attribute="rebuild"
+      permission="cmf.ManagePortal"
+      layer="collective.elastic.interfaces.IElasticSearchLayer"
+      />
+
+  <browser:page
+      name="elastic-synchronize"
+      for="Products.CMFPlone.CatalogTool.CatalogTool"
+      class="collective.elastic.browser.utilviews.Utils"
+      attribute="synchronize"
+      permission="cmf.ManagePortal"
+      layer="collective.elastic.interfaces.IElasticSearchLayer"
+      />
+
+  <browser:viewlet
+      name="collective.elastic.migration"
+      manager="plone.app.layout.viewlets.interfaces.IAboveContent"
+      view="collective.elastic.browser.controlpanel.ElasticControlPanelView"
+      class=".browser.ControlPanelWarning"
+      permission="cmf.ManagePortal"
+      layer="collective.elastic.interfaces.IElasticSearchLayer"
+      />
+
+  <subscriber
+      for="z3c.form.interfaces.IAfterWidgetUpdateEvent"
+      handler=".subscribers.disable_enabled_widget"
+      />
+
+  <subscriber
+      for="plone.registry.interfaces.IRecordModifiedEvent"
+      handler=".subscribers.refuse_enabling"
+      />
+
+</configure>
