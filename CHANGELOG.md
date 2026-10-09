@@ -8,6 +8,7 @@
 - Rebuild the elasticsearch client when the connection settings change @instification
 - A blank full-text query no longer restricts the results @instification
 - Render the control panel when the cluster doesn't answer @instification
+- Report the status and body of a bad response when fetching index data @instification
 
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 

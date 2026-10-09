@@ -43,7 +43,10 @@ def fetch_data(plone_url, uuid, attributes):
         if "@id" in content and "data" in content:
             return content["data"]
     else:
-        raise Exception("Bad response from Plone Backend")
+        raise Exception(
+            f"Bad response from Plone Backend: {response.status_code} for {url}\n"
+            f"{response.text[:500]}"
+        )
 
 
 def fetch_blob_data(plone_url, fieldname, data):
