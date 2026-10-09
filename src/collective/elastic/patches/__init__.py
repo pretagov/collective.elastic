@@ -13,26 +13,54 @@ import time
 import urllib
 
 
+PREVIOUS = "_elastic_previous_"
+
+
+def preserve_previous(scope, original, replacement):
+    """Monkey patch handler that also keeps the method it replaces.
+
+    Like the ``preserveOriginal`` handler it keeps the unpatched method as
+    ``_old_<name>``. The method in place when patching, which is
+    collective.elasticsearch's patch while that is still installed, is kept as
+    ``_elastic_previous_<name>``: the patches call it while this add-on isn't
+    active, so collective.elasticsearch keeps working until the migration.
+    """
+    current = getattr(scope, original)
+    if current is replacement:
+        # Configuration loaded again, e.g. by another test layer
+        return
+    if not hasattr(scope, f"_old_{original}"):
+        setattr(scope, f"_old_{original}", current)
+    setattr(scope, f"{PREVIOUS}{original}", current)
+    setattr(scope, original, replacement)
+
+
+def previous(obj, name):
+    """The implementation of ``name`` this add-on's patch replaced."""
+    return getattr(obj, f"{PREVIOUS}{name}")
+
+
 def unrestrictedSearchResults(self, REQUEST=None, **kw):
     manager = ElasticSearchManager()
-    active = manager.active
-    method = manager.search_results if active else self._old_unrestrictedSearchResults
-    return method(REQUEST, check_perms=False, **kw)
+    if manager.active:
+        return manager.search_results(REQUEST, check_perms=False, **kw)
+    return previous(self, "unrestrictedSearchResults")(REQUEST, **kw)
 
 
 def safeSearchResults(self, REQUEST=None, **kw):
     manager = ElasticSearchManager()
-    active = manager.active
-    method = manager.search_results if active else self._old_searchResults
-    return method(REQUEST, check_perms=True, **kw)
+    if manager.active:
+        return manager.search_results(REQUEST, check_perms=True, **kw)
+    return previous(self, "searchResults")(REQUEST, **kw)
 
 
 def manage_catalogRebuild(self, RESPONSE=None, URL1=None):  # NOQA W0613
     """need to be publishable"""
     manager = ElasticSearchManager()
-    if manager.enabled:
-        manager._recreate_catalog()
-        alsoProvides(getRequest(), interfaces.IReindexActive)
+    if not manager.enabled:
+        return previous(self, "manage_catalogRebuild")(RESPONSE=RESPONSE, URL1=URL1)
+    manager._recreate_catalog()
+    alsoProvides(getRequest(), interfaces.IReindexActive)
 
     elapse = time.time()
     c_elapse = process_time()
@@ -44,10 +72,9 @@ def manage_catalogRebuild(self, RESPONSE=None, URL1=None):  # NOQA W0613
 
     msg = f"Catalog Rebuilt\nTotal time: {elapse}\nTotal CPU time: {c_elapse}"
 
-    if manager.enabled:
-        processQueue()
-        manager.flush_indices()
-        noLongerProvides(getRequest(), interfaces.IReindexActive)
+    processQueue()
+    manager.flush_indices()
+    noLongerProvides(getRequest(), interfaces.IReindexActive)
     if RESPONSE is not None:
         RESPONSE.redirect(
             URL1
@@ -61,7 +88,7 @@ def manage_catalogClear(self, *args, **kwargs):
     manager = ElasticSearchManager()
     if manager.enabled and not manager.active:
         manager._recreate_catalog()
-    return self._old_manage_catalogClear(*args, **kwargs)
+    return previous(self, "manage_catalogClear")(*args, **kwargs)
 
 
 def uncatalog_object(self, *args, **kwargs):
@@ -77,7 +104,7 @@ def uncatalog_object(self, *args, **kwargs):
                 continue
             data.append(("delete", brain.UID, {}))
         manager.bulk(data=data)
-    return self._old_uncatalog_object(*args, **kwargs)
+    return previous(self, "uncatalog_object")(*args, **kwargs)
 
 
 def get_ordered_ids(context) -> dict:
@@ -98,7 +125,7 @@ def moveObjectsByDelta(self, ids, delta, subset_ids=None, suppress_events=False)
     manager = ElasticSearchManager()
     ordered = self if IOrdering.providedBy(self) else None
     before = get_ordered_ids(self)
-    res = self._old_moveObjectsByDelta(
+    res = previous(self, "moveObjectsByDelta")(
         ids, delta, subset_ids=subset_ids, suppress_events=suppress_events
     )
     if manager.active:

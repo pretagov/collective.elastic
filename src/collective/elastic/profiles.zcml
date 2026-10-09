@@ -6,7 +6,7 @@
 
   <genericsetup:registerProfile
       name="default"
-      title="Elastic Search"
+      title="Elastic Search (collective.elastic)"
       description="Installs the Elastic Search plone integration package"
       provides="Products.GenericSetup.interfaces.EXTENSION"
       directory="profiles/default"

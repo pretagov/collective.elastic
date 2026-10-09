@@ -37,7 +37,7 @@
 
   <utility
       factory=".queueprocessor.IndexProcessor"
-      name="elasticsearch"
+      name="collective.elastic"
       />
 
 </configure>

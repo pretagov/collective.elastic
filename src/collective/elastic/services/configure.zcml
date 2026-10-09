@@ -16,6 +16,7 @@
       for="Products.CMFCore.interfaces.ISiteRoot"
       permission="cmf.ManagePortal"
       name="@elasticsearch"
+      layer="collective.elastic.interfaces.IElasticSearchLayer"
       />
 
   <plone:service
@@ -24,6 +25,7 @@
       for="Products.CMFCore.interfaces.ISiteRoot"
       permission="cmf.ManagePortal"
       name="@elasticsearch"
+      layer="collective.elastic.interfaces.IElasticSearchLayer"
       />
 
 </configure>

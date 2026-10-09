@@ -9,7 +9,7 @@ from zope.component import getUtility
 class ExtractData(Service):
     def reply(self):
         queueprocessor = getUtility(
-            IElasticSearchIndexQueueProcessor, name="elasticsearch"
+            IElasticSearchIndexQueueProcessor, name="collective.elastic"
         )
         attributes = self.request.get("attributes", [])
         uuid = self.request.get("uuid", None)

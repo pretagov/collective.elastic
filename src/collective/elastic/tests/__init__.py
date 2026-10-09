@@ -23,7 +23,7 @@ class BaseTest(unittest.TestCase):
     layer = ElasticSearch_INTEGRATION_TESTING
 
     def get_processor(self):
-        return getUtility(IElasticSearchIndexQueueProcessor, name="elasticsearch")
+        return getUtility(IElasticSearchIndexQueueProcessor, name="collective.elastic")
 
     def setUp(self):
         super().setUp()
