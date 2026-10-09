@@ -2,6 +2,8 @@
 
 ## 6.0.0 (unreleased)
 
+- Serialize set values in index data as lists @instification
+
 - Fork collective.elasticsearch 6.x as collective.elastic @instification
 
 - Run next to collective.elasticsearch @instification

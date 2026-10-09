@@ -4,6 +4,7 @@ from collective.elastic import logger
 from collective.elastic import utils
 from collective.elastic.compat import es_bulk
 from collective.elastic.compat import es_search
+from collective.elastic.compat import get_serializer_params
 from collective.elastic.compat import has_attachment_processor
 from collective.elastic.compat import indices_put_mapping
 from collective.elastic.compat import indices_put_settings
@@ -300,7 +301,10 @@ class ElasticSearchManager:
         conn = local.get_local(self.connection_key)
         if not conn:
             hosts, params = utils.get_connection_settings()
-            local.set_local(self.connection_key, Elasticsearch(hosts, **params))
+            local.set_local(
+                self.connection_key,
+                Elasticsearch(hosts, **get_serializer_params(), **params),
+            )
             conn = local.get_local(self.connection_key)
         return conn
 
